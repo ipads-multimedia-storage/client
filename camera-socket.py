@@ -26,8 +26,9 @@ def SendVideo():
     capture = cv2.VideoCapture(0)
     # 读取一帧图像，读取成功:ret=1 frame=读取到的一帧图像；读取失败:ret=0
     ret, frame = capture.read()
+    time_stamp = int(round(time.time() * 1000))
     # 压缩参数，后面cv2.imencode将会用到，对于jpeg来说，15代表图像质量，越高代表图像质量越好为 0-100，默认95
-    encode_param = [int(cv2.IMWRITE_JPEG_QUALITY),15]
+    encode_param = [int(cv2.IMWRITE_JPEG_QUALITY), 15]
 
     while ret:
         # 停止0.1S 防止发送过快服务的处理不过来，如果服务端的处理很多，那么应该加大这个值
@@ -41,17 +42,17 @@ def SendVideo():
         stringData = data.tostring()
         # 先发送要发送的数据的长度
         # ljust() 方法返回一个原字符串左对齐,并使用空格填充至指定长度的新字符串
-        print(str.encode(str(len(stringData)).ljust(16)))
+        sock.send(str.encode(str(time_stamp).ljust(16)))
         sock.send(str.encode(str(len(stringData)).ljust(16)))
         # 发送数据
         sock.send(stringData)
-        print(stringData)
         # 读取服务器返回值
         # receive = sock.recv(1024)
         # if len(receive):
         #     print(str(receive, encoding='utf-8'))
         # 读取下一帧图片
         ret, frame = capture.read()
+        time_stamp = int(round(time.time() * 1000))
         if cv2.waitKey(10) == 27:
             break
     sock.close()
