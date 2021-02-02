@@ -14,7 +14,7 @@ def send_video():
     address = ('localhost', 8002)
 
     # estimate frame_size and fps
-    capture = cv2.VideoCapture(0)
+    capture = cv2.VideoCapture("1.mp4")
     frame_size_tot = 0
     start_time = int(round(time.time()))
     itr = 100  # iteration times set to 100, you can change it as you want
@@ -106,6 +106,19 @@ def receive_message():
     while 1:
         length = int(recvall(conn, 16).rstrip())
         response = json.loads(recvall(conn, length))
+
+        # get information related to object
+        speed = response["speed"]
+        objects = response["objects"]
+        print("speed now is" + str(speed));
+        current_time = int(round(time.time() * 1000))
+        print("time now is" + str(current_time))
+        if (len(objects) > 0):
+            for obj in objects:
+                print("object (ID:{})".format(str(obj["id"])))
+                print("\ttime: {}".format(str(obj["time"])));
+                print("\tlocation: ({}, {})".format(str(obj["x"]), str(obj["y"])));
+
         # compare current bandwidth and expected bandwidth
         average_bandwidth = response["bandwidth"]
         expected = fps * frame_size
