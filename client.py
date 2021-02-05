@@ -26,7 +26,7 @@ def send_video():
         data = numpy.array(imgencode)
         frame_size_tot += data.size
     frame_size = frame_size_tot/itr/1000  # unit: KB
-    time_interval = int(round(time.time())) - start_time
+    time_interval = time.time() - start_time
     fps = int(itr/time_interval)
     print("avg frame size is: " + str(frame_size) + "KB, fps is: " + str(fps))
     print("Initialization finished, you can start server now.")
@@ -110,30 +110,35 @@ def receive_message():
         # get information related to object
         speed = response["speed"]
         objects = response["objects"]
-        print("speed now is" + str(speed));
+        print("speed now is" + str(speed))
         current_time = int(round(time.time() * 1000))
         print("time now is" + str(current_time))
-        if (len(objects) > 0):
+        print("cost " + str(current_time-response["sendTime"]) + " ms on network(one way)")
+        if len(objects) > 0:
             for obj in objects:
                 print("object (ID:{})".format(str(obj["id"])))
-                print("\ttime: {}".format(str(obj["time"])));
-                print("\tlocation: ({}, {})".format(str(obj["x"]), str(obj["y"])));
+                print("\ttime: {}".format(str(obj["time"])))
+                print("\tlocation: ({}, {})".format(str(obj["x"]), str(obj["y"])))
 
         # compare current bandwidth and expected bandwidth
         average_bandwidth = response["bandwidth"]
+        print("average bandwidth is: " + str(average_bandwidth))
         expected = fps * frame_size
         if average_bandwidth < expected - 100:
             down_count += 1
             if down_count > 5:
                 encode_rate /= 2
                 print("bandwidth is not enough, performing downgrade")
+                down_count = 0
                 needAdjust.set()
         if average_bandwidth > expected + 100 and encode_rate < 100:
             up_count += 1
             if up_count > 5:
-                encode_rate = min(encode_rate + 10, 100)
-                print("bandwidth is enough, performing upgrade")
-                needAdjust.set()
+                if encode_rate < 100:
+                    encode_rate = min(encode_rate + 10, 100)
+                    print("bandwidth is enough, performing upgrade")
+                    needAdjust.set()
+                up_count = 0
 
 
 if __name__ == '__main__':
