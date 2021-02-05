@@ -5,7 +5,7 @@ import time
 import sys
 import json
 import threading
-
+import arm_controller as AC
 
 def send_video():
     global frame_size
@@ -118,6 +118,9 @@ def receive_message():
                 print("object (ID:{})".format(str(obj["id"])))
                 print("\ttime: {}".format(str(obj["time"])));
                 print("\tlocation: ({}, {})".format(str(obj["x"]), str(obj["y"])));
+        
+                # NOTE: AC.move will block execution of this thread
+                AC.move(obj["x"], obj["y"], obj["angle"], obj["speed"])
 
         # compare current bandwidth and expected bandwidth
         average_bandwidth = response["bandwidth"]
@@ -137,6 +140,7 @@ def receive_message():
 
 
 if __name__ == '__main__':
+    AC.move_to_init_pos()
     print("Please don't start server until the initialization finishes!")
     fps = 0
     frame_size = 0
