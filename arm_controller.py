@@ -57,7 +57,7 @@ def rotater_reset():
 
 
 # XXX: speed is currently not used
-def move(image_x, image_y, angle, speed):
+def move(image_x, image_y, angle, speed, time):
     # convert image coord to world coord
     world_x, world_y = convertCoordinate(image_x, image_y)
 
