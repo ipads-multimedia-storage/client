@@ -11,10 +11,10 @@ def send_video():
     global frame_size
     global fps
     global encode_rate
-    address = ('localhost', 8002)
+    address = ("192.168.1.6", 8002)
 
     # estimate frame_size and fps
-    capture = cv2.VideoCapture("1.mp4")
+    capture = cv2.VideoCapture(0)
     frame_size_tot = 0
     start_time = int(round(time.time()))
     itr = 100  # iteration times set to 100, you can change it as you want
@@ -108,19 +108,17 @@ def receive_message():
         response = json.loads(recvall(conn, length))
 
         # get information related to object
-        speed = response["speed"]
-        objects = response["objects"]
-        print("speed now is" + str(speed));
+        object = response["object"]
         current_time = int(round(time.time() * 1000))
         print("time now is" + str(current_time))
-        if (len(objects) > 0):
-            for obj in objects:
-                print("object (ID:{})".format(str(obj["id"])))
-                print("\ttime: {}".format(str(obj["time"])));
-                print("\tlocation: ({}, {})".format(str(obj["x"]), str(obj["y"])));
+        if (object):
+            print("object (ID:{})".format(str(object["id"])))
+            print("\ttime: {}".format(str(object["time"])));
+            print("\tspeed: {}".format(str(object["speed"])))
+            print("\tlocation: ({}, {})".format(str(object["x"]), str(object["y"])));
         
-                # NOTE: AC.move will block execution of this thread
-                AC.move(obj["x"], obj["y"], obj["angle"], obj["speed"])
+            # NOTE: AC.move will block execution of this thread
+            AC.move(object["x"], object["y"], object["angle"], object["speed"], object["time"])
 
         # compare current bandwidth and expected bandwidth
         average_bandwidth = response["bandwidth"]

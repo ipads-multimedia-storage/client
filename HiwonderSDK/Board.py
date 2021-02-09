@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 import os
 import sys
-project_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-sys.path.append(project_dir + "/HiwonderSDK/")
+sys.path.append('/home/pi/ArmPi/HiwonderSDK/')
 import time
 import RPi.GPIO as GPIO
 from BusServoCmd import *

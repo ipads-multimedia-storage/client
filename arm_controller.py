@@ -39,7 +39,7 @@ def move_to_pos(x, y, z):
         return False
     
     # result[2] is the time spent to move to that position
-    return result[2]
+    return result
 
 # servo 1 (aka. gripper) is responsible to grab the object
 def gripper_tighten():
@@ -56,9 +56,14 @@ def rotater_reset():
     rotater_set_to(500)
 
 
+def convertByTimeInterval(image_x, image_y, speed, time):
+    return image_x, image_y
+    
+    
 # XXX: speed is currently not used
-def move(image_x, image_y, angle, speed):
+def move(image_x, image_y, angle, speed, event_time):
     # convert image coord to world coord
+    image_x, image_y = convertByTimeInterval(image_x, image_y, speed, event_time)
     world_x, world_y = convertCoordinate(image_x, image_y)
 
     # set light and buzzer just for a prompt
@@ -87,24 +92,24 @@ def move(image_x, image_y, angle, speed):
 
     coord_to_put = (-14.5, 11.5)
 
-    result = move_to_pos(coord_to_put.x, coord_to_put.y, 12)
+    result = move_to_pos(coord_to_put[0], coord_to_put[1], 12)
     assert result != False
     time.sleep(result[2] / 1000)
     
-    rotater_angle = getAngle(coord_to_put.x, coord_to_put.y, -90)
+    rotater_angle = getAngle(coord_to_put[0], coord_to_put[1], -90)
     rotater_set_to(rotater_angle)
     time.sleep(0.5)
 
-    result = move_to_pos(coord_to_put.x, coord_to_put.y, 4.5)
+    result = move_to_pos(coord_to_put[0], coord_to_put[1], 4.5)
     time.sleep(0.5)
     
-    result = move_to_pos(coord_to_put.x, coord_to_put.y, 1.5)
+    result = move_to_pos(coord_to_put[0], coord_to_put[1], 1.5)
     time.sleep(0.8)
 
     gripper_loose()
     time.sleep(0.8)
 
-    result = move_to_pos(coord_to_put.x, coord_to_put.y, 12)
+    result = move_to_pos(coord_to_put[0], coord_to_put[1], 12)
     time.sleep(0.8)
 
     move_to_init_pos()
