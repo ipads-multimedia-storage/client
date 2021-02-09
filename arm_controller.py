@@ -57,10 +57,18 @@ def rotater_reset():
 
 
 def convertByTimeInterval(image_x, image_y, speed, time):
+    # XXX: where to get the direction of speed
+    # assume it's along +x direction
+    current_time = round(time.time() * 1000)
+    # sleep time is 2.1s
+    sleep_time = 2100
+    # assume 200ms deviation
+    episilon = 200
+
+    delta_time = current_time + sleep_time + episilon - time
+    image_x += delta_time * speed
     return image_x, image_y
     
-    
-# XXX: speed is currently not used
 def move(image_x, image_y, angle, speed, event_time):
     # convert image coord to world coord
     image_x, image_y = convertByTimeInterval(image_x, image_y, speed, event_time)
@@ -83,7 +91,12 @@ def move(image_x, image_y, angle, speed, event_time):
     move_to_pos(world_x, world_y, 1.5)
     time.sleep(1.5)
 
+    # at this point, gripper should arrive at the catching position
+    # so the total sleep time is 2.1s
+
     gripper_tighten()
+    # if not perform well, 
+    # we could lower the sleep time here to let gripper catch more quickly
     time.sleep(0.8)
 
     rotater_reset()
