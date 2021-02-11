@@ -56,7 +56,7 @@ def rotater_reset():
     rotater_set_to(500)
 
 
-def convertByTimeInterval(image_x, image_y, speed, time):
+def convertByTimeInterval(image_x, image_y, speed, event_time):
     # XXX: where to get the direction of speed
     # assume it's along +x direction
     current_time = round(time.time() * 1000)
@@ -65,7 +65,7 @@ def convertByTimeInterval(image_x, image_y, speed, time):
     # assume 200ms deviation
     episilon = 200
 
-    delta_time = current_time + sleep_time + episilon - time
+    delta_time = current_time + sleep_time + episilon - event_time
     image_x += delta_time * speed
     return image_x, image_y
     
