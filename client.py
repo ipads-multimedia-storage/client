@@ -7,6 +7,17 @@ import json
 import threading
 
 
+def recvall(sock, count):
+    buf = b''  # buf type: byte
+    while count:
+        newbuf = sock.recv(count)
+        if not newbuf:
+            return None
+        buf += newbuf
+        count -= len(newbuf)
+    return buf
+
+
 def send_video():
     global frame_size
     global fps
@@ -79,9 +90,6 @@ def send_video():
 
 
 def receive_message():
-    global encode_rate
-    global frame_size
-    global fps
     address = ('0.0.0.0', 8003)
     # socket.SOCK_STREAM：for TCP
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -89,20 +97,9 @@ def receive_message():
     # param: max connection number
     s.listen(1)
 
-    def recvall(sock, count):
-        buf = b''  # buf type: byte
-        while count:
-            newbuf = sock.recv(count)
-            if not newbuf:
-                return None
-            buf += newbuf
-            count -= len(newbuf)
-        return buf
-
     conn, addr = s.accept()
     print('receiving side: accepted connection from '+str(addr))
     isReady.set()  # set event to inform the other thread
-    up_count = down_count = 0
     while 1:
         length = int(recvall(conn, 16).rstrip())
         response = json.loads(recvall(conn, length))
@@ -119,6 +116,25 @@ def receive_message():
                 print("object (ID:{})".format(str(obj["id"])))
                 print("\ttime: {}".format(str(obj["time"])))
                 print("\tlocation: ({}, {})".format(str(obj["x"]), str(obj["y"])))
+
+
+def detect_bandwidth():
+    global encode_rate
+    global frame_size
+    global fps
+    address = ('0.0.0.0', 8004)
+    # socket.SOCK_STREAM：for TCP
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.bind(address)
+    # param: max connection number
+    s.listen(1)
+
+    conn, addr = s.accept()
+    print('bandwidth detection: accepted connection from ' + str(addr))
+    up_count = down_count = 0
+    while 1:
+        length = int(recvall(conn, 16).rstrip())
+        response = json.loads(recvall(conn, length))
 
         # compare current bandwidth and expected bandwidth
         average_bandwidth = response["bandwidth"]
@@ -150,5 +166,7 @@ if __name__ == '__main__':
     needAdjust = threading.Event()
     t1 = threading.Thread(target=send_video)
     t2 = threading.Thread(target=receive_message)
+    t3 = threading.Thread(target=detect_bandwidth)
     t1.start()
     t2.start()
+    t3.start()
