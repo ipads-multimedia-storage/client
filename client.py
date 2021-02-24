@@ -25,7 +25,7 @@ def send_video():
     address = ('localhost', 8002)
 
     # estimate frame_size and fps
-    capture = cv2.VideoCapture("1.mp4")
+    capture = cv2.VideoCapture("vedio.avi")
     frame_size_tot = 0
     start_time = int(round(time.time()))
     itr = 100  # iteration times set to 100, you can change it as you want
@@ -38,7 +38,12 @@ def send_video():
         frame_size_tot += data.size
     frame_size = frame_size_tot/itr/1000  # unit: KB
     time_interval = time.time() - start_time
-    fps = int(itr/time_interval)
+
+    if time_interval <= 0:
+        fps = 100
+    else:
+        fps = int(itr / time_interval)
+        
     print("avg frame size is: " + str(frame_size) + "KB, fps is: " + str(fps))
     print("Initialization finished, you can start server now.")
 
