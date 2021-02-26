@@ -5,9 +5,7 @@ import time
 import sys
 import json
 import threading
-import arm_controller as AC
-
-fps_exp = 10
+import argparse
 
 
 def recvall(sock, count):
@@ -25,7 +23,7 @@ def send_video():
     global frame_size
     global fps
     global encode_rate
-    address = ('localhost', 8002)
+    address = (server_url, 8002)
 
     # estimate frame_size and fps
     capture = cv2.VideoCapture(0)
@@ -50,7 +48,7 @@ def send_video():
     print("avg frame size is: " + str(frame_size) + "KB, fps is: " + str(fps))
     print("Initialization finished, you can start server now.")
 
-    if fps_exp < fps:
+    if 0 < fps_exp < fps:
         wait_time = int(1000 / fps_exp - 1000 / fps)
         print("Wait " + str(float(wait_time / 1000)) +
               " s every frame to match expected fps")
@@ -131,7 +129,8 @@ def receive_message():
             print("\tlocation: ({}, {})".format(str(object["x"]), str(object["y"])))
 
             # NOTE: AC.move will block execution of this thread
-            AC.move(object["x"], object["y"], object["angle"], object["speed"], object["time"])
+            if mode != 'debug':
+                AC.move(object["x"], object["y"], object["angle"], object["speed"], object["time"])
 
 
 def detect_bandwidth():
@@ -174,7 +173,23 @@ def detect_bandwidth():
 
 
 if __name__ == '__main__':
-    AC.move_to_init_pos()
+    # parse arguments
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-m', '--mode', type=str, default='run', help="mode: run(with arm) or debug(without arm)")
+    parser.add_argument('-s', '--server', type=str, default='localhost', help='server url')
+    parser.add_argument('-f', '--fps', type=int, default=-1, help='expected fps')
+    args = parser.parse_args()
+    fps_exp = args.fps
+    server_url = args.server
+    mode = args.mode
+    print("Your server's ip is: " + server_url)
+    print("Expected fps(-1 for disabled): " + str(fps_exp))
+    if mode == 'debug':
+        print("Running without arm")
+    else:
+        import arm_controller as AC
+        AC.move_to_init_pos()
+
     print("Please don't start server until the initialization finishes!")
     fps = 0
     frame_size = 0
