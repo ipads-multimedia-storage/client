@@ -21,17 +21,6 @@ def recvall(sock, count):
     return buf
 
 
-def recvall(sock, count):
-    buf = b''  # buf type: byte
-    while count:
-        newbuf = sock.recv(count)
-        if not newbuf:
-            return None
-        buf += newbuf
-        count -= len(newbuf)
-    return buf
-
-
 def send_video():
     global frame_size
     global fps
