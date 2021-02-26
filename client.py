@@ -127,7 +127,7 @@ def receive_message():
             print("\ttime: {}".format(str(object["time"])))
             print("\tspeed: {}".format(str(object["speed"])))
             print("\tlocation: ({}, {})".format(str(object["x"]), str(object["y"])))
-
+            print("\tlatency: {}".format(str(current_time-object["time"])))
             # NOTE: AC.move will block execution of this thread
             if mode != 'debug':
                 AC.move(object["x"], object["y"], object["angle"], object["speed"], object["time"])
