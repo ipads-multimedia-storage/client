@@ -21,6 +21,17 @@ def recvall(sock, count):
     return buf
 
 
+def recvall(sock, count):
+    buf = b''  # buf type: byte
+    while count:
+        newbuf = sock.recv(count)
+        if not newbuf:
+            return None
+        buf += newbuf
+        count -= len(newbuf)
+    return buf
+
+
 def send_video():
     global frame_size
     global fps
@@ -28,7 +39,7 @@ def send_video():
     address = ('localhost', 8002)
 
     # estimate frame_size and fps
-    capture = cv2.VideoCapture("video.avi")
+    capture = cv2.VideoCapture(0)
     frame_size_tot = 0
     start_time = int(round(time.time()))
     itr = 100  # iteration times set to 100, you can change it as you want
