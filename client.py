@@ -5,6 +5,9 @@ import time
 import sys
 import json
 import threading
+import arm_controller as AC
+
+fps_exp = 10
 
 
 def recvall(sock, count):
@@ -25,7 +28,7 @@ def send_video():
     address = ('localhost', 8002)
 
     # estimate frame_size and fps
-    capture = cv2.VideoCapture("vedio.avi")
+    capture = cv2.VideoCapture(0)
     frame_size_tot = 0
     start_time = int(round(time.time()))
     itr = 100  # iteration times set to 100, you can change it as you want
@@ -43,9 +46,16 @@ def send_video():
         fps = 100
     else:
         fps = int(itr / time_interval)
-        
+
     print("avg frame size is: " + str(frame_size) + "KB, fps is: " + str(fps))
     print("Initialization finished, you can start server now.")
+
+    if fps_exp < fps:
+        wait_time = int(1000 / fps_exp - 1000 / fps)
+        print("Wait " + str(float(wait_time / 1000)) +
+              " s every frame to match expected fps")
+    else:
+        wait_time = 0
 
     # waiting for the other thread
     while True:
@@ -63,7 +73,7 @@ def send_video():
         sys.exit(1)
 
     print("sending side: built connection with " + str(address))
-    ret, frame = capture.read()   # ret == 1 for success, 0 for failure
+    ret, frame = capture.read()  # ret == 1 for success, 0 for failure
     time_stamp = int(round(time.time() * 1000))  # record event time
 
     while ret:
@@ -89,6 +99,7 @@ def send_video():
         # then read next frame
         ret, frame = capture.read()
         time_stamp = int(round(time.time() * 1000))
+        time.sleep(float(wait_time/1000))
         # if cv2.waitKey(10) == 27:
         #     break
     sock.close()
@@ -103,24 +114,24 @@ def receive_message():
     s.listen(1)
 
     conn, addr = s.accept()
-    print('receiving side: accepted connection from '+str(addr))
+    print('receiving side: accepted connection from ' + str(addr))
     isReady.set()  # set event to inform the other thread
     while 1:
         length = int(recvall(conn, 16).rstrip())
         response = json.loads(recvall(conn, length))
 
         # get information related to object
-        speed = response["speed"]
-        objects = response["objects"]
-        print("speed now is" + str(speed))
+        object = response["object"]
         current_time = int(round(time.time() * 1000))
         print("time now is" + str(current_time))
-        print("cost " + str(current_time-response["sendTime"]) + " ms on network(one way)")
-        if len(objects) > 0:
-            for obj in objects:
-                print("object (ID:{})".format(str(obj["id"])))
-                print("\ttime: {}".format(str(obj["time"])))
-                print("\tlocation: ({}, {})".format(str(obj["x"]), str(obj["y"])))
+        if object:
+            print("object (ID:{})".format(str(object["id"])))
+            print("\ttime: {}".format(str(object["time"])))
+            print("\tspeed: {}".format(str(object["speed"])))
+            print("\tlocation: ({}, {})".format(str(object["x"]), str(object["y"])))
+
+            # NOTE: AC.move will block execution of this thread
+            AC.move(object["x"], object["y"], object["angle"], object["speed"], object["time"])
 
 
 def detect_bandwidth():
@@ -163,6 +174,7 @@ def detect_bandwidth():
 
 
 if __name__ == '__main__':
+    AC.move_to_init_pos()
     print("Please don't start server until the initialization finishes!")
     fps = 0
     frame_size = 0
