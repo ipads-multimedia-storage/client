@@ -63,7 +63,7 @@ def send_video():
             isReady.wait()
 
     try:
-        # socket.SOCK_STREAM：for TCP
+        # socket.SOCK_STREAM:for TCP
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         sock.connect(address)
     except socket.error as msg:
@@ -105,7 +105,7 @@ def send_video():
 
 def receive_message():
     address = ('0.0.0.0', 8003)
-    # socket.SOCK_STREAM：for TCP
+    # socket.SOCK_STREAM:for TCP
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.bind(address)
     # param: max connection number
@@ -138,7 +138,7 @@ def detect_bandwidth():
     global frame_size
     global fps
     address = ('0.0.0.0', 8004)
-    # socket.SOCK_STREAM：for TCP
+    # socket.SOCK_STREAM:for TCP
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.bind(address)
     # param: max connection number
