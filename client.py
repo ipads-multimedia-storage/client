@@ -178,12 +178,15 @@ if __name__ == '__main__':
     parser.add_argument('-m', '--mode', type=str, default='run', help="mode: run(with arm) or debug(without arm)")
     parser.add_argument('-s', '--server', type=str, default='localhost', help='server url')
     parser.add_argument('-f', '--fps', type=int, default=-1, help='expected fps')
+    parser.add_argument('-e', '--encodeRate', type=int, default=95, help='encoding rate(0-100, 100 for best)')
     args = parser.parse_args()
     fps_exp = args.fps
     server_url = args.server
     mode = args.mode
+    encode_rate = args.encodeRate
     print("Your server's ip is: " + server_url)
     print("Expected fps(-1 for disabled): " + str(fps_exp))
+    print("Initial encoding rate is: " + str(encode_rate))
     if mode == 'debug':
         print("Running without arm")
     else:
@@ -193,7 +196,6 @@ if __name__ == '__main__':
     print("Please don't start server until the initialization finishes!")
     fps = 0
     frame_size = 0
-    encode_rate = 95
     isReady = threading.Event()
     needAdjust = threading.Event()
     t1 = threading.Thread(target=send_video)
