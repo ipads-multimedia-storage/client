@@ -45,7 +45,7 @@ def send_video():
     else:
         fps = int(itr / time_interval)
 
-    print("avg frame size is: " + str(frame_size) + "KB, fps is: " + str(fps))
+    print("Average frame size is: " + str(frame_size) + "KB, fps is: " + str(fps))
     print("Initialization finished, you can start server now.")
 
     if 0 < fps_exp < fps:
@@ -94,10 +94,10 @@ def send_video():
         sock.send(str.encode(str(len(body)).ljust(16)))
         sock.send(body.encode('utf-8'))
         sock.send(string_data)
+        time.sleep(float(wait_time / 1000))
         # then read next frame
         ret, frame = capture.read()
         time_stamp = int(round(time.time() * 1000))
-        time.sleep(float(wait_time/1000))
         # if cv2.waitKey(10) == 27:
         #     break
     sock.close()
