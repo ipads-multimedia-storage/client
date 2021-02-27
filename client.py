@@ -147,14 +147,26 @@ def detect_bandwidth():
     conn, addr = s.accept()
     print('bandwidth detection: accepted connection from ' + str(addr))
     up_count = down_count = 0
+    average_bandwidth = 1000000  # unit: KB/s, 1GB/s for initial value
     while 1:
         length = int(recvall(conn, 16).rstrip())
         response = json.loads(recvall(conn, length))
 
         # compare current bandwidth and expected bandwidth
-        average_bandwidth = response["bandwidth"]
-        print("average bandwidth is: " + str(average_bandwidth))
-        expected = fps * frame_size
+        send_time = response["sendTime"]
+        process_time = response["processTime"]
+        data_length = response["dataLength"]
+        transport_time = int(round(time.time() * 1000)) - send_time - process_time
+        print("transport time: " + str(transport_time) + " ms")
+        if transport_time > 0:
+            bandwidth = data_length/transport_time*2
+        else:
+            bandwidth = 1000000
+        average_bandwidth = min(average_bandwidth*0.8 + bandwidth*0.2, 1000000)
+
+        print("current bandwidth: " + str(bandwidth) +
+              " KB/s, average bandwidth: " + str(average_bandwidth) + " KB/s")
+        expected = fps_exp * frame_size
         if average_bandwidth < expected - 100:
             down_count += 1
             if down_count > 5:
