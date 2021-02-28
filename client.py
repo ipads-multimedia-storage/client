@@ -172,7 +172,7 @@ def detect_bandwidth():
               " KB/s, average bandwidth: " + str(average_bandwidth) + " KB/s")
         if average_bandwidth < expected - 100:
             down_count += 1
-            up_count = min(up_count-1, 0)
+            up_count = max(up_count-1, 0)
             if down_count > 5:
                 encode_rate /= 2
                 print("bandwidth is not enough, performing downgrade")
@@ -180,7 +180,7 @@ def detect_bandwidth():
                 needAdjust.set()
         if average_bandwidth > expected + 100 and encode_rate < 100:
             up_count += 1
-            down_count = min(down_count-1, 0)
+            down_count = max(down_count-1, 0)
             if up_count > 5:
                 if encode_rate < 100:
                     encode_rate = min(encode_rate + 10, 100)
