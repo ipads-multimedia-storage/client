@@ -166,7 +166,10 @@ def detect_bandwidth():
 
         print("current bandwidth: " + str(bandwidth) +
               " KB/s, average bandwidth: " + str(average_bandwidth) + " KB/s")
-        expected = fps_exp * frame_size
+        if fps_exp > 0:
+            expected = fps_exp * frame_size
+        else:
+            expected = fps * frame_size
         if average_bandwidth < expected - 100:
             down_count += 1
             if down_count > 5:
