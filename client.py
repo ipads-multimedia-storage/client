@@ -146,6 +146,10 @@ def detect_bandwidth():
 
     conn, addr = s.accept()
     print('bandwidth detection: accepted connection from ' + str(addr))
+    if fps_exp > 0:
+        expected = fps_exp * frame_size
+    else:
+        expected = fps * frame_size
     up_count = down_count = 0
     average_bandwidth = 1000000  # unit: KB/s, 1GB/s for initial value
     while 1:
@@ -166,9 +170,9 @@ def detect_bandwidth():
 
         print("current bandwidth: " + str(bandwidth) +
               " KB/s, average bandwidth: " + str(average_bandwidth) + " KB/s")
-        expected = fps_exp * frame_size
         if average_bandwidth < expected - 100:
             down_count += 1
+            up_count = max(up_count-1, 0)
             if down_count > 5:
                 encode_rate /= 2
                 print("bandwidth is not enough, performing downgrade")
@@ -176,6 +180,7 @@ def detect_bandwidth():
                 needAdjust.set()
         if average_bandwidth > expected + 100 and encode_rate < 100:
             up_count += 1
+            down_count = max(down_count-1, 0)
             if up_count > 5:
                 if encode_rate < 100:
                     encode_rate = min(encode_rate + 10, 100)
