@@ -17,14 +17,15 @@ def convertCoordinate(x, y, size=(640, 480)):
     x = leMap(x, 0, size[0], 0, 640)
     x = x - 320
     x = -x
+    # x -= 100
+    x += 150
     x_ = round(x * map_param_, 2)
-    x_ -= 1
 
     y = leMap(y, 0, size[1], 0, 480)
     y = 240 - y
     y = -y
+    y += 100
     y_ = round(y * map_param_ + image_center_distance, 2)
-    y_ += 1
 
     return x_, y_
     # TODO: coord conversion
